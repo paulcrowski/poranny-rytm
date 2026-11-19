@@ -1,8 +1,8 @@
 const CACHE_PREFIX = 'poranny-rytm-';
-const CACHE = CACHE_PREFIX + 'v8';
+const CACHE = CACHE_PREFIX + 'v9';
 const scope = new URL(self.registration.scope);
 const shell = new URL('./', scope).href;
-const files = ['./', './style.css?v=7', './app.js?v=7', './cloud.js', './cloud-config.js', './manifest.webmanifest',
+const files = ['./', './style.css?v=8', './app.js?v=8', './cloud.js', './cloud-config.js', './manifest.webmanifest',
   './icon.svg', './icon-192.png', './icon-512.png'];
 const assets = new Set(files.slice(1).map(path => new URL(path, scope).href));
 

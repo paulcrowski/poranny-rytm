@@ -77,7 +77,17 @@ function save() {
 function toast(message){$('#toast').textContent=message;$('#toast').style.display='block';clearTimeout(toast.timeout);toast.timeout=setTimeout(()=>$('#toast').style.display='none',4500)}
 const sun='<svg class="sun" viewBox="0 0 120 120" fill="none" aria-hidden="true"><circle cx="60" cy="60" r="23" stroke="currentColor" stroke-width="3"/><path d="M60 5v15M60 100v15M5 60h15M100 60h15M21 21l11 11M88 88l11 11M99 21L88 32M32 88L21 99" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
 function art(pose,large=false){const poses={jump:'M100 62v48m0-35L65 45m35 30l35-30m-35 65l-32 40m32-40l32 40',squat:'M100 62l-10 35m0-20l35 8m-35 12l35 12-23 37m-12-49l-25 18 10 30',push:'M55 94l90 25m-70-19l-4 38m62-22l22 22',plank:'M55 94l90 25m-70-19l-4 38h-20m82-22l22 22',crunch:'M57 111l35-29m-16 14l28 14m-47 1l49 10 20-37 22 49',stretch:'M100 62v48m0-34l-35 1m35 0l-20 16-10-17m30 34l-16 40m16-40l16 40',calm:'M100 62v43m0-28L76 103H58m42-26l24 26h18m-42 2l-29 27 59 0-30-27',custom:'M100 62v48m0-34L74 93m26-17l26 17m-26 17l-16 40m16-40l16 40'};const head={push:[42,87],plank:[42,87],crunch:[102,73]};const [cx,cy]=head[pose]||[100,45];return `<svg viewBox="0 0 200 170" fill="none" aria-hidden="true" class="${pose==='calm'&&large?'breathing':''}"><ellipse cx="100" cy="153" rx="74" ry="8" fill="#c9d8b8"/><circle cx="${cx}" cy="${cy}" r="11" fill="currentColor"/><path d="${poses[pose]||poses.custom}" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
-function header(){return `<header><div class="brand"><span class="brand-mark">☀</span> poranny rytm</div>${!installed&&!session?'<button class="install" data-action="install">Dodaj do ekranu</button>':''}</header>`}
+function header() {
+  return `<header>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">☀</span> poranny rytm</div>
+    ${session ? '' : `<div class="header-actions">
+      <button class="header-action" data-action="history">Historia</button>
+      ${installed ? '' : `<button class="header-action" data-action="install" aria-label="Dodaj do ekranu" title="Dodaj do ekranu">
+        <span class="install-label">Dodaj do ekranu</span><span class="install-icon" aria-hidden="true">↓</span>
+      </button>`}
+    </div>`}
+  </header>`;
+}
 function localDay(date) {
   return [date.getFullYear(), date.getMonth() + 1, date.getDate()]
     .map(value => String(value).padStart(2, '0')).join('-');
@@ -167,6 +177,9 @@ function home() {
   $('#app').innerHTML = `${header()}
     <section class="hero" data-theme="${mode}">
       <div class="landscape" aria-hidden="true"><i></i><b></b></div>
+      <button class="rename-plan" data-action="rename-program" aria-label="Zmień nazwę planu" title="Zmień nazwę planu">
+        <span aria-hidden="true">✎</span>
+      </button>
       <div class="eyebrow">Twój plan</div>
       <h1>${esc(programs[mode])}</h1>
       <div class="stats"><span>${clock(total())}</span><span>${list.length} ${list.length===1?'krok':list.length%10>=2 && list.length%10<=4 && !(list.length%100>=12 && list.length%100<=14)?'kroki':'kroków'}</span></div>
@@ -174,10 +187,6 @@ function home() {
     <nav class="programs" aria-label="Wybór treningu">
       ${Object.entries(programs).map(([key, label]) => `<button class="secondary" data-action="program" data-program="${key}" aria-pressed="${mode === key}">${esc(label)}</button>`).join('')}
     </nav>
-    <div class="plan-tools">
-      <button class="install" data-action="rename-program">Zmień nazwę planu</button>
-      <button class="install" data-action="history">Historia</button>
-    </div>
     <div class="section-heading"><h2>Kroki</h2>${mode === 'workout' ? '<button class="install" id="sync-open">Połącz urządzenia</button>' : ''}</div>
     <section aria-label="Lista etapów">
       ${list.map((e,i) => `<div class="exercise">

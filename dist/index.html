@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#142d29"><meta name="description" content="Twój prosty poranny trening i chwila oddechu. Ćwicz we własnym tempie."><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-192.png"><link rel="stylesheet" href="style.css"><title>Poranny rytm</title></head>
+<body><main id="app"></main><dialog id="editor"><form id="edit-form"><div class="dialog-heading"><h2 id="edit-title">Dodaj ćwiczenie</h2><button type="button" class="icon-button" id="close-editor" aria-label="Zamknij">×</button></div><label>Nazwa ćwiczenia<input id="exercise-name" maxlength="60" pattern=".*\S.*" title="Wpisz nazwę ćwiczenia" required placeholder="Np. rozciąganie ramion"></label><label>Czas w sekundach<input id="exercise-time" type="number" min="5" max="3600" step="1" required value="30"></label><label>Krótka wskazówka<textarea id="exercise-note" maxlength="240" rows="3" placeholder="Co chcesz zapamiętać podczas ćwiczenia?"></textarea></label><button class="primary" type="submit">Zapisz ćwiczenie</button><button type="button" class="danger" id="delete-exercise">Usuń ćwiczenie</button></form></dialog>
+<dialog id="install-help" aria-labelledby="install-title">
+  <form method="dialog">
+    <h2 id="install-title">Dodaj do ekranu głównego</h2>
+    <p><strong>Android:</strong> otwórz aplikację w Chrome. W menu ⋮ wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego”.</p>
+    <p><strong>iPhone i iPad:</strong> otwórz aplikację w Safari. Wybierz „Udostępnij”, potem „Do ekranu początkowego”. Jeśli pojawi się opcja „Otwórz jako aplikację”, włącz ją.</p>
+    <button class="primary">Gotowe</button>
+  </form>
+</dialog>
+<dialog id="sync-dialog" aria-labelledby="sync-title">
+<form method="dialog"><div class="dialog-heading"><h2 id="sync-title">Połącz urządzenia</h2><button class="icon-button" aria-label="Zamknij">×</button></div></form>
+<label>Kod planu<input id="sync-code" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+<p id="sync-status" role="status"></p>
+<div class="sync-actions"><button class="primary" data-sync="create">Utwórz nowy kod</button><button class="secondary" data-sync="join">Pobierz plan z kodu</button><button class="secondary" data-sync="sync">Synchronizuj teraz</button></div>
+</dialog><script type="module" src="cloud.js"></script>
+<div id="toast" role="status"></div><script src="app.js" type="module"></script></body></html>

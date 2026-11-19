@@ -74,10 +74,11 @@ function home() {
   session = null;
   const list = data[mode];
   $('#app').innerHTML = `${header()}
-    <section class="hero">
-      <div class="eyebrow">Ćwiczenia i medytacja</div>
+    <section class="hero" data-theme="${mode}">
+      <div class="landscape" aria-hidden="true"><i></i><b></b></div>
+      <div class="eyebrow">Twój plan</div>
       <h1>${programs[mode]}</h1>
-      <div class="stats"><span>${clock(total())}</span><span>${list.length} etapów</span></div>
+      <div class="stats"><span>${clock(total())}</span><span>${list.length} ${list.length===1?'krok':list.length%10>=2 && list.length%10<=4 && !(list.length%100>=12 && list.length%100<=14)?'kroki':'kroków'}</span></div>
     </section>
     <nav class="programs" aria-label="Wybór treningu">
       ${Object.entries(programs).map(([key, label]) => `<button class="secondary" data-action="program" data-program="${key}" aria-pressed="${mode === key}">${label}</button>`).join('')}

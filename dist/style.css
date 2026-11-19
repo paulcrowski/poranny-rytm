@@ -35,3 +35,44 @@ header{margin-bottom:24px}
   border-color: #183c32;
   color: #fff;
 }
+
+/* Warm paper, deep pine and a different horizon for each practice. */
+:root { background:#f8f6ef; color:#193528 }
+main { max-width:800px }
+header { border-bottom:1px solid #d3d9ca; padding-bottom:14px; margin-bottom:18px }
+.brand { font-family:Georgia,serif; font-size:23px; font-weight:normal }
+.brand-mark { background:#244e3d; color:#ffdc85; border-radius:50%; width:36px; height:36px; padding:0; display:grid; place-items:center }
+.hero { --sky:#f1ca85; --orb:#fff1ba; --ridge:#b78c50; --hill:#537057; --front:#254c40; isolation:isolate; color:#253c2e; background:var(--sky); padding:34px; border:0; border-radius:18px; margin:16px 0; min-height:202px }
+.hero[data-theme=workout] { --sky:#edb99c; --orb:#ffddac; --ridge:#c48c70; --hill:#996950; --front:#694738 }
+.hero[data-theme=calm] { --sky:#cdd7e2; --orb:#fff3dd; --ridge:#a4adb8; --hill:#73899a; --front:#495e73 }
+.landscape { position:absolute; inset:0; overflow:hidden; z-index:-1; background:linear-gradient(105deg,var(--sky) 24%,transparent 83%) }
+.landscape::before { content:""; position:absolute; width:27%; aspect-ratio:1; border-radius:50%; background:var(--orb); right:9%; top:9%; box-shadow:0 0 0 12px color-mix(in srgb,var(--orb) 24%,transparent),0 0 0 25px color-mix(in srgb,var(--orb) 12%,transparent) }
+.landscape::after,.landscape i,.landscape b { content:""; position:absolute; right:-3%; bottom:-1%; width:66%; height:88%; background:var(--ridge); clip-path:polygon(0 100%,40% 65%,56% 73%,82% 27%,100% 43%,100% 100%) }
+.landscape i { z-index:1; background:var(--hill); height:70%; width:59%; clip-path:polygon(0 100%,34% 70%,60% 48%,66% 52%,100% 12%,100% 100%) }
+.landscape b { z-index:2; background:var(--front); width:55%; height:43%; clip-path:polygon(0 100%,30% 84%,60% 69%,80% 48%,100% 28%,100% 100%) }
+.hero h1,.session h1,.finish h1 { font-family:Georgia,serif; font-weight:normal; letter-spacing:-.055em; line-height:1.01 }
+.hero h1 { max-width:62%; font-size:clamp(38px,7vw,64px); margin:13px 0 }
+.hero .eyebrow,.stats { color:#263a30 }
+.stats { font-size:14px; gap:12px; margin-top:15px }
+.stats span+span { border-left:1px solid #65705a; padding-left:12px }
+.programs { background:#e8eade; padding:4px; border-radius:13px; flex-wrap:nowrap; gap:2px }
+.programs button { flex:1; background:transparent; border-radius:10px; font-size:14px; line-height:1.2; padding:12px 5px; color:#425343 }
+.programs button[aria-pressed=true],.primary { background:#204b39; color:#fffdf2 }
+.primary:hover { background:#305e49 }
+.exercise { background:transparent; border-bottom:1px solid #d5dccf; border-radius:0; margin:0; padding:10px 0 }
+.mini-art { background:#e4eadb; color:#365941 }
+.install,.secondary { background:#e6eadf; color:#31513b }
+.bottom { background:linear-gradient(transparent,#f8f6ef 24%); z-index:3 }
+.bottom-inner { max-width:744px }
+.add { color:#33523e; border-color:#9aab96 }
+.timer { background:conic-gradient(#387454 var(--progress),#dce3d3 0); padding:7px }
+.timer-inner { background:#f8f6ef }
+.large-art svg { color:#345b46 }
+.digits { color:#214936; font-weight:550 }
+@media(max-width:520px) {
+  .hero { min-height:174px; padding:24px 19px }
+  .hero h1 { max-width:68%; font-size:clamp(34px,9vw,45px) }
+  .programs button { font-size:13px; min-height:46px }
+  .session .large-art { height:108px }
+  .session .large-art svg { height:105px }
+}

@@ -6,7 +6,11 @@ function node(selector){if(!nodes.has(selector))nodes.set(selector,{value:'',sty
 const context=vm.createContext({console,structuredClone,setTimeout,clearTimeout,setInterval(){},performance:{now:()=>0},navigator:{},window:{addEventListener(){}},document:{querySelector:node,addEventListener(){}},localStorage:{getItem:()=>null,setItem(){}},confirm:()=>true});
 vm.runInContext(fs.readFileSync('dist/app.js','utf8'),context);
 vm.runInContext(`
-if(total()!==390)throw Error('Incorrect workout total');
+if(total()!==100)throw Error('Incorrect warmup total');
+mode='workout';
+if(total()!==130)throw Error('Incorrect strength total');
+const cues = [];
+cue = (kind, delay = 0) => cues.push([kind, delay]);
 start();if(session.phase!=='prepare')throw Error('Missing preparation');
 advance();if(session.phase!=='exercise'||session.remaining!==30)throw Error('Incorrect first exercise');
 pause();if(!session.paused)throw Error('Pause failed');
@@ -16,7 +20,11 @@ advance();if(session.phase!=='exercise'||session.index!==1)throw Error('Next exe
 advance(true);if(session.completed!==1)throw Error('Skipped exercise counted as completed');
 while(session)advance();
 if(!document.querySelector('#app').innerHTML.includes('Dobry początek dnia'))throw Error('Finish failed');
-start();advance();session.index=5;advance();if(session.phase!=='exercise'||session.index!==6)throw Error('Unexpected meditation rest');
+if (JSON.stringify(cues.slice(0, 3)) !== JSON.stringify([['start',0],['end',0],['start',0]])) throw Error('Incorrect audio cues with rest');
+mode='calm'; start(); advance(); advance();
+if(session.phase!=='exercise'||session.index!==1)throw Error('Unexpected meditation rest');
+if (JSON.stringify(cues.slice(-2)) !== JSON.stringify([['end',0],['start',.28]])) throw Error('Incorrect cues for consecutive steps');
+if(workoutItems(oldDefault).some(item=>item.pose==='calm') || workoutItems([{name:'Custom'}])[0].name!=='Custom') throw Error('Legacy migration changed custom steps');
 home();mode='workout';openEditor();
 document.querySelector('#exercise-name').value='Własne ćwiczenie';
 `,context);

@@ -2,8 +2,9 @@ import vm from 'node:vm';
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 const nodes=new Map();
+const storage=new Map();
 function node(selector){if(!nodes.has(selector))nodes.set(selector,{value:'',style:{setProperty(){}},addEventListener(){},showModal(){},close(){},textContent:'',innerHTML:''});return nodes.get(selector)}
-const context=vm.createContext({console,structuredClone,setTimeout,clearTimeout,setInterval(){},performance:{now:()=>0},navigator:{},window:{addEventListener(){}},document:{querySelector:node,addEventListener(){}},localStorage:{getItem:()=>null,setItem(){}},confirm:()=>true});
+const context=vm.createContext({console,structuredClone,setTimeout,clearTimeout,setInterval(){},performance:{now:()=>0},navigator:{},window:{addEventListener(){}},document:{querySelector:node,addEventListener(){}},localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},confirm:()=>true});
 vm.runInContext(fs.readFileSync('dist/app.js','utf8'),context);
 vm.runInContext(`
 if(total()!==100)throw Error('Incorrect warmup total');
@@ -19,6 +20,10 @@ advance();if(session.phase!=='rest'||session.remaining!==10||session.completed!=
 advance();if(session.phase!=='exercise'||session.index!==1)throw Error('Next exercise failed');
 advance(true);if(session.completed!==1)throw Error('Skipped exercise counted as completed');
 while(session)advance();
+if(completionTotals().get('przysiady')?.count!==1 || completionTotals().has('pompki')) throw Error('History must record completions and exclude skips');
+recordCompletion({name:'Przysiady'},new Date(2000,0,1,23,59));
+recordCompletion({name:'PRZYSIADY'},new Date(2000,0,2,0,1));
+if(readHistory()['2000-01-01']['przysiady'].count!==1 || completionTotals().get('przysiady').count!==3) throw Error('Incorrect daily history or total');
 if(!document.querySelector('#app').innerHTML.includes('Dobry początek dnia'))throw Error('Finish failed');
 if (JSON.stringify(cues.slice(0, 3)) !== JSON.stringify([['start',0],['end',0],['start',0]])) throw Error('Incorrect audio cues with rest');
 mode='calm'; start(); advance(); advance();

@@ -76,3 +76,15 @@ header { border-bottom:1px solid #d3d9ca; padding-bottom:14px; margin-bottom:18p
   .session .large-art { height:108px }
   .session .large-art svg { height:105px }
 }
+
+.hero h1,.programs button { overflow-wrap:anywhere }
+.programs button { min-width:0 }
+.plan-tools { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end }
+.plan-tools button { min-height:42px }
+#history-dialog { max-height:calc(100dvh - 32px) }
+#history-content details { border-bottom:1px solid #d5dccf; padding:12px 0 }
+#history-content summary { cursor:pointer; font-weight:650 }
+.history-list { list-style:none; padding:0; margin:6px 0 0 }
+.history-list li { display:flex; justify-content:space-between; gap:12px; padding:7px 0 }
+.history-list li span:first-child { overflow-wrap:anywhere }
+.history-list li span:last-child { font-variant-numeric:tabular-nums }

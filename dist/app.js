@@ -7,7 +7,16 @@ try{const raw=localStorage.getItem(STORE);if(raw){const parsed=JSON.parse(raw);i
 const PLAN_STORE = 'poranny-rytm-plan-v3';
 const EXTRA_STORE = 'poranny-rytm-programs-v1';
 const restOptions = [0, 5, 10, 15, 20, 30];
+const PROGRAM_NAMES_STORE = 'poranny-rytm-program-names-v1';
+const HISTORY_STORE = 'poranny-rytm-history-v1';
 const programs = { warmup: 'Rozgrzewka poranna', workout: 'Trening siłowy', calm: 'Medytacja' };
+try {
+  const saved = JSON.parse(localStorage.getItem(PROGRAM_NAMES_STORE));
+  for (const key of Object.keys(programs)) {
+    const name = saved?.[key];
+    if (typeof name === 'string' && name.trim() && name.length <= 32) programs[key] = name.trim();
+  }
+} catch {}
 const oldDefault = [...defaults.workout, ...defaults.calm.map(item => ({ ...item, restBefore: false }))];
 const defaultWorkout = defaults.workout.filter(item => ['squat', 'push', 'crunch', 'plank'].includes(item.pose));
 function workoutItems(items) {
@@ -69,26 +78,112 @@ function toast(message){$('#toast').textContent=message;$('#toast').style.displa
 const sun='<svg class="sun" viewBox="0 0 120 120" fill="none" aria-hidden="true"><circle cx="60" cy="60" r="23" stroke="currentColor" stroke-width="3"/><path d="M60 5v15M60 100v15M5 60h15M100 60h15M21 21l11 11M88 88l11 11M99 21L88 32M32 88L21 99" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
 function art(pose,large=false){const poses={jump:'M100 62v48m0-35L65 45m35 30l35-30m-35 65l-32 40m32-40l32 40',squat:'M100 62l-10 35m0-20l35 8m-35 12l35 12-23 37m-12-49l-25 18 10 30',push:'M55 94l90 25m-70-19l-4 38m62-22l22 22',plank:'M55 94l90 25m-70-19l-4 38h-20m82-22l22 22',crunch:'M57 111l35-29m-16 14l28 14m-47 1l49 10 20-37 22 49',stretch:'M100 62v48m0-34l-35 1m35 0l-20 16-10-17m30 34l-16 40m16-40l16 40',calm:'M100 62v43m0-28L76 103H58m42-26l24 26h18m-42 2l-29 27 59 0-30-27',custom:'M100 62v48m0-34L74 93m26-17l26 17m-26 17l-16 40m16-40l16 40'};const head={push:[42,87],plank:[42,87],crunch:[102,73]};const [cx,cy]=head[pose]||[100,45];return `<svg viewBox="0 0 200 170" fill="none" aria-hidden="true" class="${pose==='calm'&&large?'breathing':''}"><ellipse cx="100" cy="153" rx="74" ry="8" fill="#c9d8b8"/><circle cx="${cx}" cy="${cy}" r="11" fill="currentColor"/><path d="${poses[pose]||poses.custom}" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
 function header(){return `<header><div class="brand"><span class="brand-mark">☀</span> poranny rytm</div>${!installed&&!session?'<button class="install" data-action="install">Dodaj do ekranu</button>':''}</header>`}
+function localDay(date) {
+  return [date.getFullYear(), date.getMonth() + 1, date.getDate()]
+    .map(value => String(value).padStart(2, '0')).join('-');
+}
+
+function readHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_STORE)) ?? {};
+  } catch {
+    return {};
+  }
+}
+
+let history = readHistory();
+const exerciseKey = name => name.trim().toLocaleLowerCase('pl-PL');
+
+function recordCompletion(exercise, date = new Date()) {
+  const day = localDay(date);
+  const key = exerciseKey(exercise.name);
+  const latest = readHistory();
+  const counts = new Map(Object.entries(latest[day] ?? {}));
+  counts.set(key, { name: exercise.name, count: (counts.get(key)?.count ?? 0) + 1 });
+  latest[day] = Object.fromEntries(counts);
+  try {
+    localStorage.setItem(HISTORY_STORE, JSON.stringify(latest));
+    history = latest;
+  } catch {
+    toast('Nie udało się zapisać ćwiczenia w historii.');
+  }
+}
+
+function completionTotals() {
+  const totals = new Map();
+  for (const day of Object.values(history)) {
+    for (const [key, { name, count }] of Object.entries(day)) {
+      totals.set(key, { name, count: (totals.get(key)?.count ?? 0) + count });
+    }
+  }
+  return totals;
+}
+
+function historyList(entries) {
+  return `<ul class="history-list">${entries.map(({ name, count }) =>
+    `<li><span>${esc(name)}</span><span>${count}×</span></li>`).join('')}</ul>`;
+}
+
+function openHistory() {
+  history = readHistory();
+  const totals = [...completionTotals().values()].sort((a, b) =>
+    b.count - a.count || a.name.localeCompare(b.name, 'pl'));
+  const dates = Object.keys(history).sort().reverse();
+  const formatter = new Intl.DateTimeFormat('pl-PL', { dateStyle: 'long', timeZone: 'UTC' });
+  $('#history-content').innerHTML = dates.length ? `
+    <details open><summary>Łącznie według ćwiczeń</summary>${historyList(totals)}</details>
+    <h3>Dni treningu</h3>
+    ${dates.map(date => `
+      <details><summary><time datetime="${esc(date)}">${formatter.format(new Date(date))}</time></summary>
+        ${historyList(Object.values(history[date]))}
+      </details>`).join('')}`
+    : '<p>Ukończ ćwiczenie, a pojawi się tutaj.</p>';
+  $('#history-dialog').showModal();
+}
+
+$('#program-name-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const name = $('#program-name').value.trim();
+  if (!name || name.length > 32) return;
+  const names = { ...programs, [mode]: name };
+  try {
+    localStorage.setItem(PROGRAM_NAMES_STORE, JSON.stringify(names));
+  } catch {
+    toast('Nie udało się zapisać nazwy planu.');
+    return;
+  }
+  programs[mode] = name;
+  $('#program-name-dialog').close();
+  home();
+  $('[data-action="rename-program"]').focus();
+});
+
 function total(){return data[mode].reduce((sum,e)=>sum+e.seconds,0)+data[mode].slice(1).filter(e=>e.restBefore!==false).length*currentRest()}
 function home() {
   session = null;
+  history = readHistory();
+  const totals = completionTotals();
   const list = data[mode];
   $('#app').innerHTML = `${header()}
     <section class="hero" data-theme="${mode}">
       <div class="landscape" aria-hidden="true"><i></i><b></b></div>
       <div class="eyebrow">Twój plan</div>
-      <h1>${programs[mode]}</h1>
+      <h1>${esc(programs[mode])}</h1>
       <div class="stats"><span>${clock(total())}</span><span>${list.length} ${list.length===1?'krok':list.length%10>=2 && list.length%10<=4 && !(list.length%100>=12 && list.length%100<=14)?'kroki':'kroków'}</span></div>
     </section>
     <nav class="programs" aria-label="Wybór treningu">
-      ${Object.entries(programs).map(([key, label]) => `<button class="secondary" data-action="program" data-program="${key}" aria-pressed="${mode === key}">${label}</button>`).join('')}
+      ${Object.entries(programs).map(([key, label]) => `<button class="secondary" data-action="program" data-program="${key}" aria-pressed="${mode === key}">${esc(label)}</button>`).join('')}
     </nav>
+    <div class="plan-tools">
+      <button class="install" data-action="rename-program">Zmień nazwę planu</button>
+      <button class="install" data-action="history">Historia</button>
+    </div>
     <div class="section-heading"><h2>Kroki</h2>${mode === 'workout' ? '<button class="install" id="sync-open">Połącz urządzenia</button>' : ''}</div>
     <section aria-label="Lista etapów">
       ${list.map((e,i) => `<div class="exercise">
         <div class="mini-art">${art(e.pose)}</div>
         <button class="exercise-info" data-action="edit" data-index="${i}">
-          <strong>${esc(e.name)}</strong><small>${clock(e.seconds)}${e.pose==='calm'?' · Medytacja':''}</small>
+          <strong>${esc(e.name)}</strong><small>${clock(e.seconds)}${totals.has(exerciseKey(e.name)) ? ` · ${totals.get(exerciseKey(e.name)).count}× ukończone` : ''}</small>
         </button>
         <div class="reorder">
           <button data-action="up" data-index="${i}" aria-label="Przenieś wyżej: ${esc(e.name)}" ${i===0?'disabled':''}>▲</button>
@@ -178,6 +273,7 @@ function advance(skipped = false) {
   const ended = s.phase === 'exercise' && !skipped;
   if (ended) {
     s.completed++;
+    recordCompletion(current());
     if (!s.paused) cue('end');
   }
   if (s.phase === 'exercise' && s.index === s.list.length - 1) {
@@ -220,7 +316,12 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', releaseWake);
 window.addEventListener('pageshow', keepAwake);
-document.addEventListener('click',async event=>{const button=event.target.closest('[data-action]');if(!button)return;const action=button.dataset.action,index=Number(button.dataset.index);if(action==='edit')openEditor(index);if(action==='add')openEditor(-1,mode==='calm');if(action==='program'){const next=button.dataset.program;if(!session&&Object.hasOwn(programs,next)){mode=next;home();document.querySelector('[data-program="'+mode+'"]')?.focus();}}if(action==='up'||action==='down'){const list=data[mode],to=index+(action==='up'?-1:1);if(to>=0&&to<list.length){[list[index],list[to]]=[list[to],list[index]];save();home()}}if(action==='start')start();if(action==='pause')pause();if(action==='skip')advance(true);if(action==='exit'){if(!session)return;const wasPaused=session.paused;if(!wasPaused)pause();if(confirm('Zakończyć tę sesję i wrócić do planu?')){releaseWake();home()}else if(!wasPaused)pause()}if(action==='home')home();if(action==='install')await installApp()});
+document.addEventListener('click',async event=>{const button=event.target.closest('[data-action]');if(!button)return;const action=button.dataset.action,index=Number(button.dataset.index);if (action === 'history') openHistory();
+if (action === 'rename-program') {
+  $('#program-name').value = programs[mode];
+  $('#program-name-dialog').showModal();
+}
+if(action==='edit')openEditor(index);if(action==='add')openEditor(-1,mode==='calm');if(action==='program'){const next=button.dataset.program;if(!session&&Object.hasOwn(programs,next)){mode=next;home();document.querySelector('[data-program="'+mode+'"]')?.focus();}}if(action==='up'||action==='down'){const list=data[mode],to=index+(action==='up'?-1:1);if(to>=0&&to<list.length){[list[index],list[to]]=[list[to],list[index]];save();home()}}if(action==='start')start();if(action==='pause')pause();if(action==='skip')advance(true);if(action==='exit'){if(!session)return;const wasPaused=session.paused;if(!wasPaused)pause();if(confirm('Zakończyć tę sesję i wrócić do planu?')){releaseWake();home()}else if(!wasPaused)pause()}if(action==='home')home();if(action==='install')await installApp()});
 async function installApp() {
   if (installed) return;
   const prompt = installPrompt;

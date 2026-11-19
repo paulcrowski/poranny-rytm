@@ -1,34 +1,20 @@
 # Poranny rytm
 
-Prosta, polska aplikacja PWA do porannego treningu i medytacji, z minutnikiem. Domyślnie plan jest zapisywany w przeglądarce.
+A Polish-language workout and meditation timer you can install as a web app. Start with a morning warm-up, a strength workout, or a meditation plan.
 
-[Wypróbuj aplikację](https://poranny-rytm-paul.morepol00.chatgpt.site).
+[Open the app](https://poranny-rytm-paul.morepol00.chatgpt.site/)
 
-## Uruchomienie
+- Rename each plan and add, edit, reorder, or remove its steps.
+- Set a duration and an optional note for each step. Short tones mark the start and end.
+- See completed exercises by day and check how many times you’ve done each one. Skipped steps are excluded.
+- Use the app offline after the first successful visit.
 
-`python -m http.server 5173 --directory dist`
+History and plan names are stored in the current browser. Exercise totals group completions by name, ignoring capitalization. Optional device sync covers the strength plan’s steps and rest setting.
 
-Otwórz http://localhost:5173. Instalacja na telefonie wymaga hostingu HTTPS. Android: menu przeglądarki → Zainstaluj aplikację / Dodaj do ekranu głównego. iPhone: Safari → Udostępnij → Do ekranu początkowego.
+## Run locally
 
-## Zakres
+Run `python3 -m http.server 5173 --directory dist` and open http://localhost:5173. Run `npm test` to check timer transitions, workout history, and PWA assets.
 
-- Trzy oddzielne zestawy z edytowalnymi krokami: rozgrzewka poranna, trening siłowy i medytacja.
-- Dodawanie, edycja, usuwanie i zmiana kolejności pozycji.
-- Czas 5–3600 sekund i opcjonalna wskazówka dla każdej pozycji.
-- Pięć sekund przygotowania; przerwy 0–30 sekund między ćwiczeniami.
-- Timer, pauza, pomijanie i delikatne sygnały rozpoczęcia i zakończenia etapu.
-- Próba utrzymania ekranu włączonego, jeśli przeglądarka to obsługuje.
-- Automatyczna pauza po ukryciu aplikacji. Sesja nie jest wznawiana po odświeżeniu.
-- Service worker zapisuje pliki do pracy offline po pierwszym udanym otwarciu.
+## Optional device sync
 
-Przykładowe ćwiczenia mają proste autorskie ilustracje SVG. Ilustracje nie są animowanym instruktażem. Bez konfiguracji Convex dane zostają na urządzeniu. Wyczyszczenie danych witryny usuwa lokalny plan. Zmiany plików aplikacji wymagają podbicia wersji cache w `dist/sw.js`.
-
-## Opcjonalna synchronizacja
-
-Uruchom `npm ci` i `npx convex dev` z własnym projektem Convex. Wpisz adres wdrożenia w `dist/cloud-config.js`. Synchronizacja treningu siłowego korzysta z klucza udostępniania planu. Rozgrzewka i medytacja zapisują się lokalnie.
-
-## Sprawdzenie
-
-`node check.mjs`
-
-Sprawdza logikę sesji i zasoby PWA. Nie zastępuje sprawdzenia instalacji, dźwięku i działania offline na docelowym telefonie.
+Run `npm ci` and `npx convex dev` with your own Convex project. Set your deployment URL in `dist/cloud-config.js`. Pair devices with the code shown in the strength plan’s sync dialog.
